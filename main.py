@@ -1,3 +1,4 @@
+const keep_alive = require(`./keep_alive.js`);
 import discord
 from discord.ext import commands
 import os
