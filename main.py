@@ -15,6 +15,8 @@ ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID'))
 @bot.event
 async def on_ready():
     print(f'Bot {bot.user} está listo y en línea.')
+    guild = bot.get_guild(GUILD_ID)
+    print(f'Conectado al servidor: {guild.name}')
 
 @bot.event
 async def on_member_join(member):
@@ -33,6 +35,14 @@ async def on_message(message):
         if guild and role and admin_channel:
             await admin_channel.send(f'{message.author.name} se ha unido y su nombre es {message.content}')
             await member.add_roles(role)
+
+@bot.event
+async def on_error(event, *args, **kwargs):
+    with open('err.log', 'a') as f:
+        if event == 'on_message':
+            f.write(f'Error en mensaje: {args[0]}\n')
+        else:
+            raise
 
 keep_alive()
 bot.run(os.getenv('DISCORD_TOKEN'))
