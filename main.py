@@ -1,3 +1,5 @@
+import discord
+from discord.ext import commands
 import os
 from keep_alive import keep_alive  # Importa la función keep_alive
 
@@ -48,12 +50,12 @@ async def on_member_join(member):
 async def on_message(message):
     if message.author.bot:
         return
-
+    
     guild = bot.get_guild(GUILD_ID)
     member = guild.get_member(message.author.id)
     role = guild.get_role(ROLE_ID)
     admin_channel = bot.get_channel(ADMIN_CHANNEL_ID)
-
+    
     # Verifica si el usuario está en la lista de espera o no tiene rol
     if member.id in awaiting_response or role not in member.roles:
         await member.add_roles(role)
@@ -62,11 +64,11 @@ async def on_message(message):
             await member.send("Gracias, se te ha asignado un rol.")
         except discord.Forbidden:
             pass
-
+        
         # Eliminamos al usuario de la lista de espera
         if member.id in awaiting_response:
             del awaiting_response[member.id]
-
+    
     await bot.process_commands(message)
 
 bot.run(TOKEN)
