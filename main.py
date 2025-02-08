@@ -1,6 +1,7 @@
 import os
 import discord
-from discord.ext import commands
+import requests
+from discord.ext import commands, tasks
 from keep_alive import keep_alive  # Para mantener el bot en línea
 
 intents = discord.Intents.default()
@@ -13,10 +14,14 @@ ROLE_ID = int(os.getenv('ROLE_ID'))
 ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID'))
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-print(f'GUILD_ID: {GUILD_ID}')
-print(f'ROLE_ID: {ROLE_ID}')
-print(f'ADMIN_CHANNEL_ID: {ADMIN_CHANNEL_ID}')
-print(f'DISCORD_TOKEN: {DISCORD_TOKEN[:4]}...')  # Mostrar solo los primeros caracteres del token
+keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
+
+@tasks.loop(minutes=5)
+async def keep_alive_task():
+    try:
+        requests.get(keep_alive_url)
+    except Exception as e:
+        print(f"Error en keep-alive: {e}")
 
 @bot.event
 async def on_ready():
@@ -26,6 +31,7 @@ async def on_ready():
         print(f'Conectado al servidor: {guild.name}')
     else:
         print(f'No se pudo encontrar el servidor con ID: {GUILD_ID}')
+    keep_alive_task.start()
 
 @bot.event
 async def on_member_join(member):
