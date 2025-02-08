@@ -8,9 +8,9 @@ intents.members = True  # Necesitamos permisos para manejar miembros
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-GUILD_ID = 1337387112403697694 int(os.getenv('GUILD_ID'))
-ROLE_ID = 1337394657860128788 int(os.getenv('ROLE_ID'))
-ADMIN_CHANNEL_ID = 1337678870316453898 int(os.getenv('ADMIN_CHANNEL_ID'))
+GUILD_ID = int(os.getenv('GUILD_ID'))
+ROLE_ID = int(os.getenv('ROLE_ID'))
+ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID'))
 
 @bot.event
 async def on_ready():
