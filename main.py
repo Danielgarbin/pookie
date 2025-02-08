@@ -1,5 +1,3 @@
-import discord
-from discord.ext import commands
 import os
 from keep_alive import keep_alive  # Importa la función keep_alive
 
