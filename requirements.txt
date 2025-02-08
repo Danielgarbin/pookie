@@ -1,2 +1,2 @@
-
-flask
+discord.py
+discord-ext-alternatives
