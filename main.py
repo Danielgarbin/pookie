@@ -14,12 +14,13 @@ ROLE_ID = int(os.getenv('ROLE_ID'))
 ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID'))
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-keep_alive_url = "https://pookie-k3sy.onrender.com.onrender.com"  # Reemplaza con la URL de tu bot
+keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
 
 @tasks.loop(minutes=5)
 async def keep_alive_task():
     try:
         requests.get(keep_alive_url)
+        print("Keep-alive request sent")
     except Exception as e:
         print(f"Error en keep-alive: {e}")
 
@@ -51,7 +52,7 @@ async def on_message(message):
             if role and admin_channel:
                 await admin_channel.send(f'{message.author.name} se ha unido y su nombre es {message.content}')
                 await member.add_roles(role)
-                await message.author.send("Gracias, acabas de inscribirte en el torneo. Para saber cuando se realizará visita el canal fases-del-torneo en el servidor.")
+                await message.author.send("Gracias, acabas de inscribirte en el torneo. Para saber en que fecha se realizará visita el canal fases-del-torneo en el servidor.")
             else:
                 print(f'No se pudo encontrar el rol o el canal con ID: {ROLE_ID} o {ADMIN_CHANNEL_ID}')
         else:
@@ -66,4 +67,6 @@ async def on_error(event, *args, **kwargs):
             raise
 
 keep_alive()
+print("Starting bot...")
 bot.run(DISCORD_TOKEN)
+print("Bot started")
