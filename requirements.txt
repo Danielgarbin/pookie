@@ -1,5 +1,4 @@
 discord.py
-discord-ext-alternatives
 requests
 pytest
 flask
