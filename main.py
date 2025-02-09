@@ -3,30 +3,44 @@ import discord
 import requests
 from discord.ext import commands, tasks
 from keep_alive import keep_alive  # Para mantener el bot en línea
-import os
-
-print("Variables de entorno:")
-for key, value in os.environ.items():
-    print(f"{key}: {value}")  # Verifica qué variables se están cargando realmente
-
 
 print("Iniciando el bot...")
 
-intents = discord.Intents.default()
-intents.members = True  # Necesitamos permisos para manejar miembros
+# Verificar todas las variables de entorno disponibles
+print("Variables de entorno detectadas en Render:")
+for key, value in os.environ.items():
+    print(f"{key}: {value}")  
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+# Leer variables de entorno
+GUILD_ID = os.getenv('GUILD_ID')
+ROLE_ID = os.getenv('ROLE_ID')
+ADMIN_CHANNEL_ID = os.getenv('ADMIN_CHANNEL_ID')
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-# Agregar registros para verificar las variables de entorno
-GUILD_ID = int(os.getenv('GUILD_ID', '0'))
-ROLE_ID = int(os.getenv('ROLE_ID', '0'))
-ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID', '0'))
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN', 'TOKEN_NO_VALIDO')
-
+# Verificar si las variables se están leyendo correctamente
 print(f"GUILD_ID: {GUILD_ID}")
 print(f"ROLE_ID: {ROLE_ID}")
 print(f"ADMIN_CHANNEL_ID: {ADMIN_CHANNEL_ID}")
-print(f"DISCORD_TOKEN: {'TOKEN_PROPORCIONADO' if DISCORD_TOKEN != 'TOKEN_NO_VALIDO' else 'TOKEN_NO_VALIDO'}")
+print(f"DISCORD_TOKEN: {'TOKEN_PROVIDED' if DISCORD_TOKEN else 'TOKEN_NOT_FOUND'}")
+
+# Convertir a enteros solo si los valores existen
+try:
+    GUILD_ID = int(GUILD_ID) if GUILD_ID else 0
+    ROLE_ID = int(ROLE_ID) if ROLE_ID else 0
+    ADMIN_CHANNEL_ID = int(ADMIN_CHANNEL_ID) if ADMIN_CHANNEL_ID else 0
+except ValueError:
+    print("Error: Alguna variable de entorno no es un número válido")
+    exit(1)
+
+if not DISCORD_TOKEN or DISCORD_TOKEN == "TOKEN_NO_VALIDO":
+    print("Error: DISCORD_TOKEN no encontrado o es inválido. Verifica las variables de entorno en Render.")
+    exit(1)
+
+# Configuración del bot
+intents = discord.Intents.default()
+intents.members = True  # Permisos para manejar miembros
+
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
 
