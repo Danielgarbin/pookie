@@ -3,3 +3,5 @@ discord-ext-alternatives
 flask
 requests
 gunicorn
+flake8
+pytest
