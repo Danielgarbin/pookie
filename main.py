@@ -22,7 +22,7 @@ print(f"ROLE_ID: {ROLE_ID}")
 print(f"ADMIN_CHANNEL_ID: {ADMIN_CHANNEL_ID}")
 print(f"DISCORD_TOKEN: {'TOKEN_PROPORCIONADO' if DISCORD_TOKEN != 'TOKEN_NO_VALIDO' else 'TOKEN_NO_VALIDO'}")
 
-keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
+keep_alive_url = "https://api.render.com/deploy/srv-cujo818gph6c73bjfgr0?key=Y-V52IbXPP4"  # Reemplaza con la URL de tu bot
 
 @tasks.loop(minutes=5)
 async def keep_alive_task():
