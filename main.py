@@ -51,7 +51,7 @@ async def on_message(message):
             if role and admin_channel:
                 await admin_channel.send(f'{message.author.name} se ha unido y su nombre es {message.content}')
                 await member.add_roles(role)
-                await message.author.send("Gracias, se te ha asignado un rol en el servidor.")
+                await message.author.send("Gracias, acabas de inscribirte en el torneo. Para saber cuando se realizará visita el canal fases-del-torneo en el servidor.")
             else:
                 print(f'No se pudo encontrar el rol o el canal con ID: {ROLE_ID} o {ADMIN_CHANNEL_ID}')
         else:
