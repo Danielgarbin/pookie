@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.9, 3.10, 3.11]
+        python-version: [3.9, 3.10, 3.11]  # Puedes ajustar las versiones según tus necesidades
 
     steps:
     - uses: actions/checkout@v2
@@ -26,3 +26,7 @@ jobs:
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
         flake8 .
+    - name: Run tests
+      run: |
+        pip install pytest
+        pytest
