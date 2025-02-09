@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.9, 3.10, 3.11]  # Asegúrate de que las versiones estén disponibles
+        python-version: [3.9, 3.10, 3.11]  # Asegúrate de usar versiones disponibles
 
     steps:
     - uses: actions/checkout@v2
@@ -30,5 +30,3 @@ jobs:
       run: |
         pip install pytest
         pytest
-```
-
