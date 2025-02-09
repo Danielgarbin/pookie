@@ -6,21 +6,17 @@ from keep_alive import keep_alive  # Para mantener el bot en línea
 
 print("Iniciando el bot...")
 
-# Leer variables de entorno
-GUILD_ID = os.getenv('GUILD_ID')
-ROLE_ID = os.getenv('ROLE_ID')
-ADMIN_CHANNEL_ID = os.getenv('ADMIN_CHANNEL_ID')
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-
-# Convertir a enteros solo si los valores existen
+# Leer variables de entorno de forma segura
 try:
-    GUILD_ID = int(GUILD_ID) if GUILD_ID else 0
-    ROLE_ID = int(ROLE_ID) if ROLE_ID else 0
-    ADMIN_CHANNEL_ID = int(ADMIN_CHANNEL_ID) if ADMIN_CHANNEL_ID else 0
+    GUILD_ID = int(os.getenv('GUILD_ID', 0))
+    ROLE_ID = int(os.getenv('ROLE_ID', 0))
+    ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID', 0))
+    DISCORD_TOKEN = os.getenv('DISCORD_TOKEN', '').strip()
 except ValueError:
-    print("Error: Alguna variable de entorno no es un número válido")
+    print("Error: Alguna variable de entorno contiene un valor no válido.")
     exit(1)
 
+# Verificar si el token es válido
 if not DISCORD_TOKEN or DISCORD_TOKEN == "TOKEN_NO_VALIDO":
     print("Error: DISCORD_TOKEN no encontrado o es inválido. Verifica las variables de entorno en Render.")
     exit(1)
@@ -89,7 +85,7 @@ async def on_error(event, *args, **kwargs):
         else:
             raise
 
-# Captura y maneja excepciones para asegurar que los errores se registren
+# Iniciar el bot de forma segura
 try:
     keep_alive()
     print("Iniciando el bot en Discord...")
