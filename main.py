@@ -24,6 +24,7 @@ print(f"DISCORD_TOKEN: {'TOKEN_PROPORCIONADO' if DISCORD_TOKEN != 'TOKEN_NO_VALI
 
 keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
 
+
 @tasks.loop(minutes=5)
 async def keep_alive_task():
     try:
@@ -31,6 +32,7 @@ async def keep_alive_task():
         print("Solicitud keep-alive enviada")
     except Exception as e:
         print(f"Error en keep-alive: {e}")
+
 
 @bot.event
 async def on_ready():
@@ -42,12 +44,14 @@ async def on_ready():
         print(f'No se pudo encontrar el servidor con ID: {GUILD_ID}')
     keep_alive_task.start()
 
+
 @bot.event
 async def on_member_join(member):
     try:
         await member.send("¡Bienvenido! Para participar, responde con tu usuario de Fortnite y especifica si es de Epic Games (PC), PlayStation o Xbox:")
     except discord.errors.Forbidden:
         print(f"No se pudo enviar un DM a {member.name}")
+
 
 @bot.event
 async def on_message(message):
@@ -66,6 +70,7 @@ async def on_message(message):
         else:
             print(f'No se pudo encontrar el servidor con ID: {GUILD_ID}')
 
+
 @bot.event
 async def on_error(event, *args, **kwargs):
     with open('err.log', 'a') as f:
@@ -73,6 +78,7 @@ async def on_error(event, *args, **kwargs):
             f.write(f'Error en mensaje: {args[0]}\n')
         else:
             raise
+
 
 # Captura y maneja excepciones para asegurar que los errores se registren
 try:
