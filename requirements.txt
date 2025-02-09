@@ -1,6 +1,5 @@
 discord.py
 discord-ext-alternatives
-flask
 requests
 gunicorn
 flake8
