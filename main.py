@@ -12,9 +12,9 @@ intents.members = True  # Necesitamos permisos para manejar miembros
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Agregar registros para verificar las variables de entorno
-GUILD_ID = int(os.getenv('GUILD_ID', 0))
-ROLE_ID = int(os.getenv('ROLE_ID', 0))
-ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID', 0))
+GUILD_ID = int(os.getenv('GUILD_ID', '0'))
+ROLE_ID = int(os.getenv('ROLE_ID', '0'))
+ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID', '0'))
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN', 'TOKEN_NO_VALIDO')
 
 print(f"GUILD_ID: {GUILD_ID}")
@@ -24,7 +24,6 @@ print(f"DISCORD_TOKEN: {'TOKEN_PROPORCIONADO' if DISCORD_TOKEN != 'TOKEN_NO_VALI
 
 keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
 
-
 @tasks.loop(minutes=5)
 async def keep_alive_task():
     try:
@@ -32,7 +31,6 @@ async def keep_alive_task():
         print("Solicitud keep-alive enviada")
     except Exception as e:
         print(f"Error en keep-alive: {e}")
-
 
 @bot.event
 async def on_ready():
@@ -44,14 +42,12 @@ async def on_ready():
         print(f'No se pudo encontrar el servidor con ID: {GUILD_ID}')
     keep_alive_task.start()
 
-
 @bot.event
 async def on_member_join(member):
     try:
         await member.send("¡Bienvenido! Para participar, responde con tu usuario de Fortnite y especifica si es de Epic Games (PC), PlayStation o Xbox:")
     except discord.errors.Forbidden:
         print(f"No se pudo enviar un DM a {member.name}")
-
 
 @bot.event
 async def on_message(message):
@@ -64,12 +60,11 @@ async def on_message(message):
             if role and admin_channel:
                 await admin_channel.send(f'{message.author.name} se ha unido y su nombre es {message.content}')
                 await member.add_roles(role)
-                await message.author.send("Gracias, acabas de inscribirte en el torneo. Para saber en que fecha se realizará visita el canal fases-del-torneo en el servidor.")
+                await message.author.send("Gracias, acabas de inscribirte en el torneo. Para saber en qué fecha se realizará, visita el canal fases-del-torneo en el servidor.")
             else:
                 print(f'No se pudo encontrar el rol o el canal con ID: {ROLE_ID} o {ADMIN_CHANNEL_ID}')
         else:
             print(f'No se pudo encontrar el servidor con ID: {GUILD_ID}')
-
 
 @bot.event
 async def on_error(event, *args, **kwargs):
@@ -78,7 +73,6 @@ async def on_error(event, *args, **kwargs):
             f.write(f'Error en mensaje: {args[0]}\n')
         else:
             raise
-
 
 # Captura y maneja excepciones para asegurar que los errores se registren
 try:
