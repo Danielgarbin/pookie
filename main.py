@@ -14,7 +14,7 @@ ROLE_ID = int(os.getenv('ROLE_ID'))
 ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID'))
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
+keep_alive_url = "https://pookie-k3sy.onrender.com.onrender.com"  # Reemplaza con la URL de tu bot
 
 @tasks.loop(minutes=5)
 async def keep_alive_task():
