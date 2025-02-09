@@ -1,3 +1,4 @@
 discord.py
 discord-ext-alternatives
 flask
+requests
