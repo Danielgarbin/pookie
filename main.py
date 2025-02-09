@@ -29,6 +29,7 @@ if not DISCORD_TOKEN or DISCORD_TOKEN == "TOKEN_NO_VALIDO":
 intents = discord.Intents.default()
 intents.members = True  # Permisos para manejar miembros
 intents.messages = True  # Permite al bot recibir mensajes
+intents.message_content = True  # NECESARIO para leer contenido de mensajes
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
