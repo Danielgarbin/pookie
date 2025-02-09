@@ -3,6 +3,12 @@ import discord
 import requests
 from discord.ext import commands, tasks
 from keep_alive import keep_alive  # Para mantener el bot en línea
+import os
+
+print("Variables de entorno:")
+for key, value in os.environ.items():
+    print(f"{key}: {value}")  # Verifica qué variables se están cargando realmente
+
 
 print("Iniciando el bot...")
 
