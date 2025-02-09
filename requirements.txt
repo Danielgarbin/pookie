@@ -1,7 +1,5 @@
 discord.py
 discord-ext-alternatives
 requests
-gunicorn
-flake8
 pytest
 flask
