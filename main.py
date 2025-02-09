@@ -22,7 +22,7 @@ print(f"ROLE_ID: {ROLE_ID}")
 print(f"ADMIN_CHANNEL_ID: {ADMIN_CHANNEL_ID}")
 print(f"DISCORD_TOKEN: {'TOKEN_PROPORCIONADO' if DISCORD_TOKEN != 'TOKEN_NO_VALIDO' else 'TOKEN_NO_VALIDO'}")
 
-keep_alive_url = "hhttps://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
+keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
 
 @tasks.loop(minutes=5)
 async def keep_alive_task():
@@ -74,7 +74,11 @@ async def on_error(event, *args, **kwargs):
         else:
             raise
 
-keep_alive()
-print("Iniciando el bot en Discord...")
-bot.run(DISCORD_TOKEN)
-print("Bot en Discord iniciado")
+# Captura y maneja excepciones para asegurar que los errores se registren
+try:
+    keep_alive()
+    print("Iniciando el bot en Discord...")
+    bot.run(DISCORD_TOKEN)
+    print("Bot en Discord iniciado")
+except Exception as e:
+    print(f"Error al iniciar el bot: {e}")
