@@ -4,15 +4,23 @@ import requests
 from discord.ext import commands, tasks
 from keep_alive import keep_alive  # Para mantener el bot en línea
 
+print("Iniciando el bot...")
+
 intents = discord.Intents.default()
 intents.members = True  # Necesitamos permisos para manejar miembros
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-GUILD_ID = int(os.getenv('GUILD_ID'))
-ROLE_ID = int(os.getenv('ROLE_ID'))
-ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID'))
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+# Agregar registros para verificar las variables de entorno
+GUILD_ID = int(os.getenv('GUILD_ID', 0))
+ROLE_ID = int(os.getenv('ROLE_ID', 0))
+ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID', 0))
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN', 'TOKEN_NO_VALIDO')
+
+print(f"GUILD_ID: {GUILD_ID}")
+print(f"ROLE_ID: {ROLE_ID}")
+print(f"ADMIN_CHANNEL_ID: {ADMIN_CHANNEL_ID}")
+print(f"DISCORD_TOKEN: {'TOKEN_PROPORCIONADO' if DISCORD_TOKEN != 'TOKEN_NO_VALIDO' else 'TOKEN_NO_VALIDO'}")
 
 keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
 
@@ -20,7 +28,7 @@ keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de t
 async def keep_alive_task():
     try:
         requests.get(keep_alive_url)
-        print("Keep-alive request sent")
+        print("Solicitud keep-alive enviada")
     except Exception as e:
         print(f"Error en keep-alive: {e}")
 
@@ -67,6 +75,6 @@ async def on_error(event, *args, **kwargs):
             raise
 
 keep_alive()
-print("Starting bot...")
+print("Iniciando el bot en Discord...")
 bot.run(DISCORD_TOKEN)
-print("Bot started")
+print("Bot en Discord iniciado")
