@@ -2,6 +2,8 @@ import os
 import discord
 import requests
 from discord.ext import commands, tasks
+from flask import Flask
+import threading
 
 print("Iniciando el bot...")
 
@@ -28,9 +30,18 @@ intents.message_content = True  # Necesario para leer el contenido de mensajes
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Render detiene el servicio web tras 15 minutos de inactividad en el plan gratuito.
-# Dado que se utiliza UptimeRobot configurado a 5 minutos, no es necesaria ninguna función adicional de keep-alive.
+# --- SERVIDOR FLASK PARA UPTIMEROBOT ---
+app = Flask(__name__)
 
+@app.route("/")
+def home():
+    return "Bot is running!", 200
+
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
+
+# --- EVENTOS Y FUNCIONALIDAD DEL BOT ---
 @bot.event
 async def on_ready():
     print(f'Bot {bot.user} está listo y en línea.')
@@ -49,11 +60,11 @@ async def on_member_join(member):
 
 @bot.event
 async def on_message(message):
-    # Procesa solo mensajes directos (DM) y de usuarios (no bots)
+    # Procesa mensajes directos (DM) de usuarios (ignora bots)
     if isinstance(message.channel, discord.DMChannel) and not message.author.bot:
         guild = bot.get_guild(GUILD_ID)
         if guild:
-            # Intenta obtener el miembro desde la caché; si no, intenta con fetch
+            # Intenta obtener el miembro desde la caché; si no, lo intenta con fetch
             member = guild.get_member(message.author.id)
             if member is None:
                 try:
@@ -92,10 +103,15 @@ async def on_error(event, *args, **kwargs):
         else:
             raise
 
-# Iniciar el bot de forma segura
-try:
-    print("Iniciando el bot en Discord...")
-    bot.run(DISCORD_TOKEN)
-    print("Bot en Discord iniciado")
-except Exception as e:
-    print(f"Error al iniciar el bot: {e}")
+# --- INICIO DEL BOT Y DEL SERVIDOR FLASK ---
+if __name__ == "__main__":
+    # Inicia el servidor Flask en un hilo separado para que Uptimerobot pueda hacer ping
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.start()
+
+    try:
+        print("Iniciando el bot en Discord...")
+        bot.run(DISCORD_TOKEN)
+        print("Bot en Discord iniciado")
+    except Exception as e:
+        print(f"Error al iniciar el bot: {e}")
