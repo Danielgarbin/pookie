@@ -2,7 +2,6 @@ import os
 import discord
 import requests
 from discord.ext import commands, tasks
-from keep_alive import keep_alive  # Función para mantener el bot en línea
 
 print("Iniciando el bot...")
 
@@ -29,20 +28,8 @@ intents.message_content = True  # Necesario para leer el contenido de mensajes
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# URL para mantener el servicio activo en Render
-keep_alive_url = "https://pookie-k3sy.onrender.com"  # Reemplaza con la URL de tu bot
-
-# Nota:
-# En el plan gratuito de Render, el servicio web se suspende tras 15 minutos de inactividad.
-# Por ello, la tarea keep_alive_task se ejecuta cada 5 minutos para evitar que el servicio se "duerma".
-# Si en algún momento el límite se reduce (por ejemplo, a 10 minutos), ajusta el intervalo de esta tarea.
-@tasks.loop(minutes=13)
-async def keep_alive_task():
-    try:
-        requests.get(keep_alive_url)
-        print("Solicitud keep-alive enviada")
-    except Exception as e:
-        print(f"Error en keep-alive: {e}")
+# Render detiene el servicio web tras 15 minutos de inactividad en el plan gratuito.
+# Dado que se utiliza UptimeRobot configurado a 5 minutos, no es necesaria ninguna función adicional de keep-alive.
 
 @bot.event
 async def on_ready():
@@ -52,8 +39,6 @@ async def on_ready():
         print(f'Conectado al servidor: {guild.name}')
     else:
         print(f'No se pudo encontrar el servidor con ID: {GUILD_ID}')
-    # Iniciar la tarea de keep-alive para mantener vivo el web service en Render
-    keep_alive_task.start()
 
 @bot.event
 async def on_member_join(member):
@@ -109,7 +94,6 @@ async def on_error(event, *args, **kwargs):
 
 # Iniciar el bot de forma segura
 try:
-    keep_alive()  # Inicia el servidor web que responde a las solicitudes de keep-alive
     print("Iniciando el bot en Discord...")
     bot.run(DISCORD_TOKEN)
     print("Bot en Discord iniciado")
