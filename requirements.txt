@@ -4,4 +4,3 @@ flask
 asyncio
 datetime
 psycopg2
-threading
