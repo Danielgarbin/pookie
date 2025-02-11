@@ -174,15 +174,16 @@ class PlatformSelectionView(discord.ui.View):
         await interaction.response.send_message("Escoge tu país:", view=view)
         await asyncio.sleep(1)
 
-# La vista de selección de país permanece casi igual; aquí creamos botones para cada país.
+# La vista de selección de país con los países hispanohablantes actualizados
 class CountrySelectionView(discord.ui.View):
     def __init__(self, user):
         super().__init__(timeout=None)
         self.user = user
         countries = [
             "Argentina", "Bolivia", "Chile", "Colombia", "Costa Rica", "Cuba",
-            "Ecuador", "El Salvador", "Guatemala", "Honduras", "Nicaragua", "Panamá",
-            "Perú", "República Dominicana", "Uruguay", "Venezuela"
+            "Ecuador", "El Salvador", "España", "Guatemala", "Honduras", "México",
+            "Nicaragua", "Panamá", "Paraguay", "Perú", "Puerto Rico", "República Dominicana",
+            "Uruguay", "Venezuela", "Guinea Ecuatorial"
         ]
         for country in countries:
             self.add_item(CountryButton(country, user))
