@@ -18,6 +18,9 @@ try:
     ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID', 0))
     DISCORD_TOKEN = os.getenv('DISCORD_TOKEN', '').strip()
     DATABASE_URL = os.getenv('DATABASE_URL', '')
+    # Es importante definir OWNER_ID y PUBLIC_CHANNEL_ID ya que se usan en los comandos de administración
+    OWNER_ID = int(os.getenv('OWNER_ID', 0))
+    PUBLIC_CHANNEL_ID = int(os.getenv('PUBLIC_CHANNEL_ID', 0))
 except ValueError:
     print("Error: Alguna variable de entorno contiene un valor no válido.")
     exit(1)
@@ -111,42 +114,42 @@ class PlatformSelectionView(discord.ui.View):
 
     @discord.ui.button(label="PC", style=discord.ButtonStyle.primary)
     async def pc_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id != self.user.id:
+        if interaction.user.id != self.view.user.id:
             await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
             return
-        registration_data[self.user.id]["platform"] = "PC"
-        registration_data[self.user.id]["step"] = "country"
-        view = CountrySelectionView(self.user)
+        registration_data[self.view.user.id]["platform"] = "PC"
+        registration_data[self.view.user.id]["step"] = "country"
+        view = CountrySelectionView(self.view.user)
         await interaction.response.send_message("Escoge tu país:", view=view, ephemeral=True)
 
     @discord.ui.button(label="PlayStation", style=discord.ButtonStyle.primary)
     async def ps_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id != self.user.id:
+        if interaction.user.id != self.view.user.id:
             await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
             return
-        registration_data[self.user.id]["platform"] = "PlayStation"
-        registration_data[self.user.id]["step"] = "country"
-        view = CountrySelectionView(self.user)
+        registration_data[self.view.user.id]["platform"] = "PlayStation"
+        registration_data[self.view.user.id]["step"] = "country"
+        view = CountrySelectionView(self.view.user)
         await interaction.response.send_message("Escoge tu país:", view=view, ephemeral=True)
 
     @discord.ui.button(label="Xbox", style=discord.ButtonStyle.primary)
     async def xbox_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id != self.user.id:
+        if interaction.user.id != self.view.user.id:
             await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
             return
-        registration_data[self.user.id]["platform"] = "Xbox"
-        registration_data[self.user.id]["step"] = "country"
-        view = CountrySelectionView(self.user)
+        registration_data[self.view.user.id]["platform"] = "Xbox"
+        registration_data[self.view.user.id]["step"] = "country"
+        view = CountrySelectionView(self.view.user)
         await interaction.response.send_message("Escoge tu país:", view=view, ephemeral=True)
 
     @discord.ui.button(label="Nintendo", style=discord.ButtonStyle.primary)
     async def nintendo_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id != self.user.id:
+        if interaction.user.id != self.view.user.id:
             await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
             return
-        registration_data[self.user.id]["platform"] = "Nintendo"
-        registration_data[self.user.id]["step"] = "country"
-        view = CountrySelectionView(self.user)
+        registration_data[self.view.user.id]["platform"] = "Nintendo"
+        registration_data[self.view.user.id]["step"] = "country"
+        view = CountrySelectionView(self.view.user)
         await interaction.response.send_message("Escoge tu país:", view=view, ephemeral=True)
 
 class CountrySelectionView(discord.ui.View):
