@@ -35,14 +35,14 @@ db_conn.autocommit = True
 def init_db():
     with db_conn.cursor() as cur:
         cur.execute("""
-             CREATE TABLE IF NOT EXISTS registrations (
+            CREATE TABLE IF NOT EXISTS registrations (
                 user_id TEXT PRIMARY KEY,
                 discord_name TEXT,
                 fortnite_username TEXT,
                 platform TEXT,
                 country TEXT
-             )
-         """)
+            )
+        """)
 init_db()
 
 # Configuración del bot
@@ -81,11 +81,15 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
+    # Agregar un pequeño delay para evitar exceder los límites si muchos usuarios se unen al mismo tiempo
+    await asyncio.sleep(1)
     try:
         await member.send("¡Bienvenido! Vamos a inscribirte en el torneo, escribe solamente tu nombre de usuario de Fortnite")
         registration_data[member.id] = {"step": "username"}
     except discord.errors.Forbidden:
         print(f"No se pudo enviar un DM a {member.name}")
+    # Agregar un delay adicional
+    await asyncio.sleep(1)
 
 @bot.event
 async def on_message(message):
@@ -99,6 +103,8 @@ async def on_message(message):
                 data["step"] = "platform"
                 view = PlatformSelectionView(message.author)
                 await message.author.send("Escoge la plataforma en la que juegas:", view=view)
+                # Agregar un delay después de enviar el mensaje
+                await asyncio.sleep(1)
                 return
     await bot.process_commands(message)
 
@@ -144,24 +150,29 @@ class PlatformSelectionView(discord.ui.View):
         registration_data[self.user.id]["step"] = "country"
         view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
+        # Agregar un delay después de enviar el mensaje
+        await asyncio.sleep(1)
 
     async def ps_callback(self, interaction: discord.Interaction):
         registration_data[self.user.id]["platform"] = "PlayStation"
         registration_data[self.user.id]["step"] = "country"
         view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
+        await asyncio.sleep(1)
 
     async def xbox_callback(self, interaction: discord.Interaction):
         registration_data[self.user.id]["platform"] = "Xbox"
         registration_data[self.user.id]["step"] = "country"
         view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
+        await asyncio.sleep(1)
 
     async def nintendo_callback(self, interaction: discord.Interaction):
         registration_data[self.user.id]["platform"] = "Nintendo"
         registration_data[self.user.id]["step"] = "country"
         view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
+        await asyncio.sleep(1)
 
 # La vista de selección de país permanece casi igual; aquí creamos botones para cada país.
 class CountrySelectionView(discord.ui.View):
@@ -192,13 +203,13 @@ class CountryButton(discord.ui.Button):
         data = registration_data[self.user.id]
         with db_conn.cursor() as cur:
             cur.execute("""
-                 INSERT INTO registrations (user_id, discord_name, fortnite_username, platform, country)
-                 VALUES (%s, %s, %s, %s, %s)
-                 ON CONFLICT (user_id) DO UPDATE SET
-                     discord_name = EXCLUDED.discord_name,
-                     fortnite_username = EXCLUDED.fortnite_username,
-                     platform = EXCLUDED.platform,
-                     country = EXCLUDED.country
+                INSERT INTO registrations (user_id, discord_name, fortnite_username, platform, country)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (user_id) DO UPDATE SET
+                    discord_name = EXCLUDED.discord_name,
+                    fortnite_username = EXCLUDED.fortnite_username,
+                    platform = EXCLUDED.platform,
+                    country = EXCLUDED.country
             """, (str(self.user.id), self.user.name, data.get("fortnite_username", ""),
                   data.get("platform", ""), self.country))
         registration_data.pop(self.user.id, None)
@@ -217,10 +228,13 @@ class CountryButton(discord.ui.Button):
                     if role and role not in member.roles:
                         try:
                             await member.add_roles(role)
+                            # Agregar un delay después de asignar el rol
                             await asyncio.sleep(1)
                         except Exception as e:
                             print(f"Error al asignar rol a {self.user.name}: {e}")
         await interaction.response.send_message("Gracias, acabas de inscribirte en el torneo. Para saber en qué fecha se realizará, visita el canal fechas-del-torneo en el servidor.")
+        # Agregar un delay después de enviar el mensaje
+        await asyncio.sleep(1)
 
 # ----------------------------
 # COMANDOS DE ADMINISTRACIÓN PARA REGISTROS (solo para OWNER_ID)
@@ -253,6 +267,8 @@ async def lista_registros(ctx):
         lines.append(line)
     full_message = "\n".join(lines)
     await ctx.send(full_message)
+    # Agregar un delay después de enviar el mensaje
+    await asyncio.sleep(1)
     try:
         await ctx.message.delete()
     except:
@@ -270,6 +286,8 @@ async def agregar_registro_manual(ctx, *, data_str: str):
     parts = [part.strip() for part in data_str.split("|")]
     if len(parts) < 5:
         await ctx.send("❌ Formato incorrecto. Usa: discord_user_id | discord_name | fortnite_username | platform | country")
+        # Agregar un delay después de enviar el mensaje
+        await asyncio.sleep(1)
         return
     user_id, discord_name, fortnite_username, platform, country = parts
     with db_conn.cursor() as cur:
@@ -283,6 +301,8 @@ async def agregar_registro_manual(ctx, *, data_str: str):
                 country = EXCLUDED.country
         """, (user_id, discord_name, fortnite_username, platform, country))
     await ctx.send("✅ Registro manual agregado.")
+    # Agregar un delay después de enviar el mensaje
+    await asyncio.sleep(1)
     try:
         await ctx.message.delete()
     except:
