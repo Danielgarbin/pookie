@@ -4,3 +4,4 @@ flask
 asyncio
 datetime
 psycopg2
+psycopg2-binary
