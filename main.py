@@ -115,42 +115,42 @@ class PlatformSelectionView(discord.ui.View):
     @discord.ui.button(label="PC", style=discord.ButtonStyle.primary)
     async def pc_button(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user.id != self.view.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
+            await interaction.response.send_message("No puedes interactuar con este mensaje.")
             return
         registration_data[self.view.user.id]["platform"] = "PC"
         registration_data[self.view.user.id]["step"] = "country"
         view = CountrySelectionView(self.view.user)
-        await interaction.response.send_message("Escoge tu país:", view=view, ephemeral=True)
+        await interaction.response.send_message("Escoge tu país:", view=view)
 
     @discord.ui.button(label="PlayStation", style=discord.ButtonStyle.primary)
     async def ps_button(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user.id != self.view.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
+            await interaction.response.send_message("No puedes interactuar con este mensaje.")
             return
         registration_data[self.view.user.id]["platform"] = "PlayStation"
         registration_data[self.view.user.id]["step"] = "country"
         view = CountrySelectionView(self.view.user)
-        await interaction.response.send_message("Escoge tu país:", view=view, ephemeral=True)
+        await interaction.response.send_message("Escoge tu país:", view=view)
 
     @discord.ui.button(label="Xbox", style=discord.ButtonStyle.primary)
     async def xbox_button(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user.id != self.view.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
+            await interaction.response.send_message("No puedes interactuar con este mensaje.")
             return
         registration_data[self.view.user.id]["platform"] = "Xbox"
         registration_data[self.view.user.id]["step"] = "country"
         view = CountrySelectionView(self.view.user)
-        await interaction.response.send_message("Escoge tu país:", view=view, ephemeral=True)
+        await interaction.response.send_message("Escoge tu país:", view=view)
 
     @discord.ui.button(label="Nintendo", style=discord.ButtonStyle.primary)
     async def nintendo_button(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user.id != self.view.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
+            await interaction.response.send_message("No puedes interactuar con este mensaje.")
             return
         registration_data[self.view.user.id]["platform"] = "Nintendo"
         registration_data[self.view.user.id]["step"] = "country"
         view = CountrySelectionView(self.view.user)
-        await interaction.response.send_message("Escoge tu país:", view=view, ephemeral=True)
+        await interaction.response.send_message("Escoge tu país:", view=view)
 
 class CountrySelectionView(discord.ui.View):
     def __init__(self, user):
@@ -170,7 +170,7 @@ class CountryButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
+            await interaction.response.send_message("No puedes interactuar con este mensaje.")
             return
         registration_data[self.user.id]["country"] = self.country
         # Guardar la información en la base de datos
@@ -204,7 +204,7 @@ class CountryButton(discord.ui.Button):
                             await asyncio.sleep(1)
                         except Exception as e:
                             print(f"Error al asignar rol a {self.user.name}: {e}")
-        await interaction.response.send_message("Gracias, acabas de inscribirte en el torneo. Para saber en qué fecha se realizará, visita el canal fechas-del-torneo en el servidor.", ephemeral=True)
+        await interaction.response.send_message("Gracias, acabas de inscribirte en el torneo. Para saber en qué fecha se realizará, visita el canal fechas-del-torneo en el servidor.")
 
 # ----------------------------
 # COMANDOS DE ADMINISTRACIÓN PARA REGISTROS (solo para OWNER_ID)
