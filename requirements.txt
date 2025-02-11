@@ -3,7 +3,6 @@ requests
 flask
 asyncio
 datetime
-re
 psycopg2
 psycopg2.extras
 threading
