@@ -6,7 +6,6 @@ import threading
 import psycopg2
 import psycopg2.extras
 import asyncio
-import datetime
 import re
 
 print("Iniciando el bot...")
@@ -18,7 +17,7 @@ try:
     ADMIN_CHANNEL_ID = int(os.getenv('ADMIN_CHANNEL_ID', 0))
     DISCORD_TOKEN = os.getenv('DISCORD_TOKEN', '').strip()
     DATABASE_URL = os.getenv('DATABASE_URL', '')
-    # Es importante definir OWNER_ID y PUBLIC_CHANNEL_ID ya que se usan en los comandos de administración
+    # Variables adicionales necesarias para comandos de administración
     OWNER_ID = int(os.getenv('OWNER_ID', 0))
     PUBLIC_CHANNEL_ID = int(os.getenv('PUBLIC_CHANNEL_ID', 0))
 except ValueError:
@@ -107,61 +106,77 @@ async def on_message(message):
 # VIEWS PARA SELECCIÓN DE PLATAFORMA Y PAÍS
 # ----------------------------
 
+# Creamos la vista de selección de plataforma de forma manual para evitar problemas de binding en los callbacks
 class PlatformSelectionView(discord.ui.View):
     def __init__(self, user):
         super().__init__(timeout=None)
         self.user = user
 
-    @discord.ui.button(label="PC", style=discord.ButtonStyle.primary)
-    async def pc_button(self, interaction: discord.Interaction):
+        # Botón PC
+        button_pc = discord.ui.Button(label="PC", style=discord.ButtonStyle.primary)
+        button_pc.callback = self.pc_callback
+        self.add_item(button_pc)
+
+        # Botón PlayStation
+        button_ps = discord.ui.Button(label="PlayStation", style=discord.ButtonStyle.primary)
+        button_ps.callback = self.ps_callback
+        self.add_item(button_ps)
+
+        # Botón Xbox
+        button_xbox = discord.ui.Button(label="Xbox", style=discord.ButtonStyle.primary)
+        button_xbox.callback = self.xbox_callback
+        self.add_item(button_xbox)
+
+        # Botón Nintendo
+        button_nintendo = discord.ui.Button(label="Nintendo", style=discord.ButtonStyle.primary)
+        button_nintendo.callback = self.nintendo_callback
+        self.add_item(button_nintendo)
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Solo se permite la interacción del usuario que inició el registro
         if interaction.user.id != self.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.")
-            return
+            await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
+            return False
+        return True
+
+    async def pc_callback(self, interaction: discord.Interaction):
         registration_data[self.user.id]["platform"] = "PC"
         registration_data[self.user.id]["step"] = "country"
         view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
 
-    @discord.ui.button(label="PlayStation", style=discord.ButtonStyle.primary)
-    async def ps_button(self, interaction: discord.Interaction):
-        if interaction.user.id != self.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.")
-            return
+    async def ps_callback(self, interaction: discord.Interaction):
         registration_data[self.user.id]["platform"] = "PlayStation"
         registration_data[self.user.id]["step"] = "country"
         view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
 
-    @discord.ui.button(label="Xbox", style=discord.ButtonStyle.primary)
-    async def xbox_button(self, interaction: discord.Interaction):
-        if interaction.user.id != self.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.")
-            return
+    async def xbox_callback(self, interaction: discord.Interaction):
         registration_data[self.user.id]["platform"] = "Xbox"
         registration_data[self.user.id]["step"] = "country"
         view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
 
-    @discord.ui.button(label="Nintendo", style=discord.ButtonStyle.primary)
-    async def nintendo_button(self, interaction: discord.Interaction):
-        if interaction.user.id != self.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.")
-            return
+    async def nintendo_callback(self, interaction: discord.Interaction):
         registration_data[self.user.id]["platform"] = "Nintendo"
         registration_data[self.user.id]["step"] = "country"
         view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
 
+# La vista de selección de país permanece casi igual; aquí creamos botones para cada país.
 class CountrySelectionView(discord.ui.View):
     def __init__(self, user):
         super().__init__(timeout=None)
         self.user = user
-        countries = ["Argentina", "Bolivia", "Chile", "Colombia", "Costa Rica", "Cuba", "Ecuador", 
-                     "El Salvador", "Guatemala", "Honduras", "Nicaragua", "Panamá", "Perú", 
-                     "República Dominicana", "Uruguay", "Venezuela"]
+        countries = [
+            "Argentina", "Bolivia", "Chile", "Colombia", "Costa Rica", "Cuba",
+            "Ecuador", "El Salvador", "Guatemala", "Honduras", "Nicaragua", "Panamá",
+            "Perú", "República Dominicana", "Uruguay", "Venezuela"
+        ]
         for country in countries:
-            self.add_item(CountryButton(country, self.user))
+            self.add_item(CountryButton(country, user))
 
+# Botón de país; al crearlo le pasamos el país y el usuario (guardado en self.user de la vista)
 class CountryButton(discord.ui.Button):
     def __init__(self, country, user):
         super().__init__(label=country, style=discord.ButtonStyle.secondary)
@@ -170,7 +185,7 @@ class CountryButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.user.id:
-            await interaction.response.send_message("No puedes interactuar con este mensaje.")
+            await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
             return
         registration_data[self.user.id]["country"] = self.country
         # Guardar la información en la base de datos
@@ -184,7 +199,8 @@ class CountryButton(discord.ui.Button):
                      fortnite_username = EXCLUDED.fortnite_username,
                      platform = EXCLUDED.platform,
                      country = EXCLUDED.country
-            """, (str(self.user.id), self.user.name, data.get("fortnite_username", ""), data.get("platform", ""), self.country))
+            """, (str(self.user.id), self.user.name, data.get("fortnite_username", ""),
+                  data.get("platform", ""), self.country))
         registration_data.pop(self.user.id, None)
         # Asignar rol automáticamente si el usuario no es OWNER_ID
         if self.user.id != OWNER_ID:
@@ -209,6 +225,7 @@ class CountryButton(discord.ui.Button):
 # ----------------------------
 # COMANDOS DE ADMINISTRACIÓN PARA REGISTROS (solo para OWNER_ID)
 # ----------------------------
+
 def is_owner_and_allowed(ctx):
     return ctx.author.id == OWNER_ID and (ctx.guild is None or ctx.channel.id == PUBLIC_CHANNEL_ID)
 
@@ -274,6 +291,7 @@ async def agregar_registro_manual(ctx, *, data_str: str):
 # ----------------------------
 # INICIO DEL SERVIDOR FLASK Y DEL BOT
 # ----------------------------
+
 if __name__ == "__main__":
     flask_thread = threading.Thread(target=run_flask)
     flask_thread.start()
