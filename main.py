@@ -113,43 +113,43 @@ class PlatformSelectionView(discord.ui.View):
         self.user = user
 
     @discord.ui.button(label="PC", style=discord.ButtonStyle.primary)
-    async def pc_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id != self.view.user.id:
+    async def pc_button(self, interaction: discord.Interaction):
+        if interaction.user.id != self.user.id:
             await interaction.response.send_message("No puedes interactuar con este mensaje.")
             return
-        registration_data[self.view.user.id]["platform"] = "PC"
-        registration_data[self.view.user.id]["step"] = "country"
-        view = CountrySelectionView(self.view.user)
+        registration_data[self.user.id]["platform"] = "PC"
+        registration_data[self.user.id]["step"] = "country"
+        view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
 
     @discord.ui.button(label="PlayStation", style=discord.ButtonStyle.primary)
-    async def ps_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id != self.view.user.id:
+    async def ps_button(self, interaction: discord.Interaction):
+        if interaction.user.id != self.user.id:
             await interaction.response.send_message("No puedes interactuar con este mensaje.")
             return
-        registration_data[self.view.user.id]["platform"] = "PlayStation"
-        registration_data[self.view.user.id]["step"] = "country"
-        view = CountrySelectionView(self.view.user)
+        registration_data[self.user.id]["platform"] = "PlayStation"
+        registration_data[self.user.id]["step"] = "country"
+        view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
 
     @discord.ui.button(label="Xbox", style=discord.ButtonStyle.primary)
-    async def xbox_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id != self.view.user.id:
+    async def xbox_button(self, interaction: discord.Interaction):
+        if interaction.user.id != self.user.id:
             await interaction.response.send_message("No puedes interactuar con este mensaje.")
             return
-        registration_data[self.view.user.id]["platform"] = "Xbox"
-        registration_data[self.view.user.id]["step"] = "country"
-        view = CountrySelectionView(self.view.user)
+        registration_data[self.user.id]["platform"] = "Xbox"
+        registration_data[self.user.id]["step"] = "country"
+        view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
 
     @discord.ui.button(label="Nintendo", style=discord.ButtonStyle.primary)
-    async def nintendo_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id != self.view.user.id:
+    async def nintendo_button(self, interaction: discord.Interaction):
+        if interaction.user.id != self.user.id:
             await interaction.response.send_message("No puedes interactuar con este mensaje.")
             return
-        registration_data[self.view.user.id]["platform"] = "Nintendo"
-        registration_data[self.view.user.id]["step"] = "country"
-        view = CountrySelectionView(self.view.user)
+        registration_data[self.user.id]["platform"] = "Nintendo"
+        registration_data[self.user.id]["step"] = "country"
+        view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
 
 class CountrySelectionView(discord.ui.View):
