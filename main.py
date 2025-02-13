@@ -9,6 +9,7 @@ import asyncio
 import re
 from psycopg2 import pool
 from contextlib import contextmanager
+import time
 
 print("Iniciando el bot...")
 
@@ -37,7 +38,13 @@ if db_pool:
 
 @contextmanager
 def get_db_cursor(**kwargs):
-    conn = db_pool.getconn()
+    # Se intenta obtener una conexión del pool; si el pool está agotado se espera 0.1 segundos antes de reintentar
+    conn = None
+    while conn is None:
+        try:
+            conn = db_pool.getconn()
+        except psycopg2.pool.PoolError:
+            time.sleep(0.1)
     conn.autocommit = True
     try:
         yield conn.cursor(**kwargs)
@@ -108,6 +115,13 @@ async def on_message(message):
     # Procesar mensajes directos (DM) para el registro
     if isinstance(message.channel, discord.DMChannel) and not message.author.bot:
         if message.content.strip().lower() == "registro":
+            with get_db_cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute("SELECT * FROM registrations WHERE user_id = %s", (str(message.author.id),))
+                row = cur.fetchone()
+            if row:
+                await message.author.send("Muchas gracias, ya estás registrado en el torneo 🎉")
+                await asyncio.sleep(1)
+                return
             registration_data[message.author.id] = {"step": "username"}
             await message.author.send("¡Bienvenido! Vamos a inscribirte en el torneo, escribe solamente tu nombre de usuario de Fortnite")
             await asyncio.sleep(1)
@@ -325,6 +339,29 @@ async def agregar_registro_manual(ctx, *, data_str: str):
         await ctx.message.delete()
     except:
         pass
+
+# ----------------------------
+# TAREA DE RECORDATORIO PARA USUARIOS NO REGISTRADOS
+# ----------------------------
+async def reminder_task():
+    await bot.wait_until_ready()
+    while not bot.is_closed():
+        guild = bot.get_guild(GUILD_ID)
+        if guild is not None:
+            role = guild.get_role(1337394657860128788)
+            for member in guild.members:
+                if not member.bot and role not in member.roles:
+                    if member.id not in registration_data:
+                        try:
+                            await member.send("Todavía no te has registrado en el torneo y no podrás participar, por favor registrate ahora")
+                            await member.send("¡Bienvenido! Vamos a inscribirte en el torneo, escribe solamente tu nombre de usuario de Fortnite")
+                            registration_data[member.id] = {"step": "username"}
+                        except discord.errors.Forbidden:
+                            print(f"No se pudo enviar DM a {member.name}")
+                        await asyncio.sleep(1)
+        await asyncio.sleep(43200)  # Espera 12 horas
+
+bot.loop.create_task(reminder_task())
 
 # ----------------------------
 # INICIO DEL SERVIDOR FLASK Y DEL BOT
