@@ -70,7 +70,12 @@ intents.members = True          # Para manejar miembros
 intents.messages = True         # Para recibir mensajes
 intents.message_content = True  # Para leer el contenido de los mensajes
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+# Se crea una subclase de Bot para programar la tarea de fondo en setup_hook
+class MyBot(commands.Bot):
+    async def setup_hook(self):
+        self.loop.create_task(reminder_task())
+
+bot = MyBot(command_prefix='!', intents=intents)
 
 # Servidor Flask para Uptimerobot
 app = Flask(__name__)
@@ -360,8 +365,6 @@ async def reminder_task():
                             print(f"No se pudo enviar DM a {member.name}")
                         await asyncio.sleep(1)
         await asyncio.sleep(43200)  # Espera 12 horas
-
-bot.loop.create_task(reminder_task())
 
 # ----------------------------
 # INICIO DEL SERVIDOR FLASK Y DEL BOT
