@@ -7,6 +7,8 @@ import psycopg2
 import psycopg2.extras
 import asyncio
 import re
+from psycopg2 import pool
+from contextlib import contextmanager
 
 print("Iniciando el bot...")
 
@@ -28,12 +30,22 @@ if not DISCORD_TOKEN or DISCORD_TOKEN == "TOKEN_NO_VALIDO":
     print("Error: DISCORD_TOKEN no encontrado o es inválido. Verifica las variables de entorno en Render.")
     exit(1)
 
-# Conexión a la base de datos y creación de la tabla de registros
-db_conn = psycopg2.connect(DATABASE_URL)
-db_conn.autocommit = True
+# Conexión a la base de datos y creación de la tabla de registros usando pool de conexiones
+db_pool = pool.SimpleConnectionPool(1, 20, DATABASE_URL)
+if db_pool:
+    print("Pool de conexiones creado exitosamente.")
+
+@contextmanager
+def get_db_cursor(**kwargs):
+    conn = db_pool.getconn()
+    conn.autocommit = True
+    try:
+        yield conn.cursor(**kwargs)
+    finally:
+        db_pool.putconn(conn)
 
 def init_db():
-    with db_conn.cursor() as cur:
+    with get_db_cursor() as cur:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS registrations (
                 user_id TEXT PRIMARY KEY,
@@ -95,6 +107,11 @@ async def on_member_join(member):
 async def on_message(message):
     # Procesar mensajes directos (DM) para el registro
     if isinstance(message.channel, discord.DMChannel) and not message.author.bot:
+        if message.content.strip().lower() == "registro":
+            registration_data[message.author.id] = {"step": "username"}
+            await message.author.send("¡Bienvenido! Vamos a inscribirte en el torneo, escribe solamente tu nombre de usuario de Fortnite")
+            await asyncio.sleep(1)
+            return
         if message.author.id in registration_data:
             data = registration_data[message.author.id]
             if data["step"] == "username":
@@ -202,7 +219,7 @@ class CountryButton(discord.ui.Button):
         registration_data[self.user.id]["country"] = self.country
         # Guardar la información en la base de datos
         data = registration_data[self.user.id]
-        with db_conn.cursor() as cur:
+        with get_db_cursor() as cur:
             cur.execute("""
                 INSERT INTO registrations (user_id, discord_name, fortnite_username, platform, country)
                 VALUES (%s, %s, %s, %s, %s)
@@ -252,7 +269,7 @@ async def lista_registros(ctx):
         except:
             pass
         return
-    with db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+    with get_db_cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute("SELECT * FROM registrations ORDER BY discord_name ASC")
         rows = cur.fetchall()
     if not rows:
@@ -291,7 +308,7 @@ async def agregar_registro_manual(ctx, *, data_str: str):
         await asyncio.sleep(1)
         return
     user_id, discord_name, fortnite_username, platform, country = parts
-    with db_conn.cursor() as cur:
+    with get_db_cursor() as cur:
         cur.execute("""
             INSERT INTO registrations (user_id, discord_name, fortnite_username, platform, country)
             VALUES (%s, %s, %s, %s, %s)
