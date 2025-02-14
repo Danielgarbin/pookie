@@ -102,6 +102,7 @@ async def on_ready():
         print(f'Conectado al servidor: {guild.name}')
     else:
         print(f'No se pudo encontrar el servidor con ID: {GUILD_ID}')
+    await asyncio.sleep(1)
 
 @bot.event
 async def on_member_join(member):
@@ -139,7 +140,6 @@ async def on_message(message):
                 data["step"] = "platform"
                 view = PlatformSelectionView(message.author)
                 await message.author.send("Escoge la plataforma en la que juegas:", view=view)
-                # Agregar un delay después de enviar el mensaje
                 await asyncio.sleep(1)
                 return
     await bot.process_commands(message)
@@ -148,7 +148,6 @@ async def on_message(message):
 # VIEWS PARA SELECCIÓN DE PLATAFORMA Y PAÍS
 # ----------------------------
 
-# Creamos la vista de selección de plataforma de forma manual para evitar problemas de binding en los callbacks
 class PlatformSelectionView(discord.ui.View):
     def __init__(self, user):
         super().__init__(timeout=None)
@@ -186,7 +185,6 @@ class PlatformSelectionView(discord.ui.View):
         registration_data[self.user.id]["step"] = "country"
         view = CountrySelectionView(self.user)
         await interaction.response.send_message("Escoge tu país:", view=view)
-        # Agregar un delay después de enviar el mensaje
         await asyncio.sleep(1)
 
     async def ps_callback(self, interaction: discord.Interaction):
@@ -210,7 +208,6 @@ class PlatformSelectionView(discord.ui.View):
         await interaction.response.send_message("Escoge tu país:", view=view)
         await asyncio.sleep(1)
 
-# La vista de selección de país con los países hispanohablantes actualizados
 class CountrySelectionView(discord.ui.View):
     def __init__(self, user):
         super().__init__(timeout=None)
@@ -224,7 +221,6 @@ class CountrySelectionView(discord.ui.View):
         for country in countries:
             self.add_item(CountryButton(country, user))
 
-# Botón de país; al crearlo le pasamos el país y el usuario (guardado en self.user de la vista)
 class CountryButton(discord.ui.Button):
     def __init__(self, country, user):
         super().__init__(label=country, style=discord.ButtonStyle.secondary)
@@ -236,7 +232,6 @@ class CountryButton(discord.ui.Button):
             await interaction.response.send_message("No puedes interactuar con este mensaje.", ephemeral=True)
             return
         registration_data[self.user.id]["country"] = self.country
-        # Guardar la información en la base de datos
         data = registration_data[self.user.id]
         with get_db_cursor() as cur:
             cur.execute("""
@@ -250,7 +245,6 @@ class CountryButton(discord.ui.Button):
             """, (str(self.user.id), self.user.name, data.get("fortnite_username", ""),
                   data.get("platform", ""), self.country))
         registration_data.pop(self.user.id, None)
-        # Asignar rol automáticamente si el usuario no es OWNER_ID
         if self.user.id != OWNER_ID:
             guild = bot.get_guild(GUILD_ID)
             if guild:
@@ -265,12 +259,10 @@ class CountryButton(discord.ui.Button):
                     if role and role not in member.roles:
                         try:
                             await member.add_roles(role)
-                            # Agregar un delay después de asignar el rol
                             await asyncio.sleep(1)
                         except Exception as e:
                             print(f"Error al asignar rol a {self.user.name}: {e}")
         await interaction.response.send_message("Gracias, acabas de inscribirte en el torneo. Para saber en qué fecha se realizará, visita el canal fechas-del-torneo en el servidor.")
-        # Agregar un delay después de enviar el mensaje
         await asyncio.sleep(1)
 
 # ----------------------------
@@ -304,7 +296,6 @@ async def lista_registros(ctx):
         lines.append(line)
     full_message = "\n".join(lines)
     await ctx.send(full_message)
-    # Agregar un delay después de enviar el mensaje
     await asyncio.sleep(1)
     try:
         await ctx.message.delete()
@@ -319,11 +310,9 @@ async def agregar_registro_manual(ctx, *, data_str: str):
         except:
             pass
         return
-    # Formato: discord_user_id | discord_name | fortnite_username | platform | country
     parts = [part.strip() for part in data_str.split("|")]
     if len(parts) < 5:
         await ctx.send("❌ Formato incorrecto. Usa: discord_user_id | discord_name | fortnite_username | platform | country")
-        # Agregar un delay después de enviar el mensaje
         await asyncio.sleep(1)
         return
     user_id, discord_name, fortnite_username, platform, country = parts
@@ -338,7 +327,6 @@ async def agregar_registro_manual(ctx, *, data_str: str):
                 country = EXCLUDED.country
         """, (user_id, discord_name, fortnite_username, platform, country))
     await ctx.send("✅ Registro manual agregado.")
-    # Agregar un delay después de enviar el mensaje
     await asyncio.sleep(1)
     try:
         await ctx.message.delete()
@@ -358,23 +346,32 @@ async def reminder_task():
                 if not member.bot and role not in member.roles:
                     if member.id not in registration_data:
                         try:
-                            await member.send("Todavía no te has registrado en el torneo y no podrás participar, por favor registrate ahora")
+                            await member.send("Todavía no te has registrado en el torneo y no podrás participar, por favor regístrate ahora")
                             await member.send("¡Bienvenido! Vamos a inscribirte en el torneo, escribe solamente tu nombre de usuario de Fortnite")
                             registration_data[member.id] = {"step": "username"}
                         except discord.errors.Forbidden:
                             print(f"No se pudo enviar DM a {member.name}")
-                        await asyncio.sleep(1)
+                        await asyncio.sleep(2)
         await asyncio.sleep(43200)  # Espera 12 horas
 
 # ----------------------------
-# INICIO DEL SERVIDOR FLASK Y DEL BOT
+# MANTENIMIENTO DE CONEXIÓN Y RECONEXIÓN
 # ----------------------------
+@bot.event
+async def on_disconnect():
+    print("Bot desconectado. Intentando reconectar en 10 segundos...")
+    await asyncio.sleep(10)
 
+# ----------------------------
+# INICIO DEL SERVIDOR FLASK Y DEL BOT CON RECONEXIÓN AUTOMÁTICA
+# ----------------------------
 if __name__ == "__main__":
     flask_thread = threading.Thread(target=run_flask)
     flask_thread.start()
-    try:
-        print("Iniciando el bot en Discord...")
-        bot.run(DISCORD_TOKEN)
-    except Exception as e:
-        print(f"Error al iniciar el bot: {e}")
+    while True:
+        try:
+            print("Iniciando el bot en Discord...")
+            bot.run(DISCORD_TOKEN)
+        except Exception as e:
+            print(f"Error al iniciar el bot: {e}. Reiniciando en 10 segundos...")
+            time.sleep(10)
